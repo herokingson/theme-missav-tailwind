@@ -69,7 +69,7 @@ if ( have_posts() ) :
 
             if ( $embed_url ) : ?>
 
-      <div class="relative w-full">
+      <div class="relative w-full h-[400px]">
         <iframe class="absolute inset-0 w-full h-[400px]" src="<?php echo esc_url( $embed_url ); ?>" frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen></iframe>
