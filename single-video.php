@@ -18,18 +18,91 @@ if ( have_posts() ) :
 <div class="md:flex md:space-x-6">
   <!-- ด้านซ้าย: player + title + actions + details -->
   <div class="md:w-2/3">
-    <!-- player -->
     <div class="bg-black rounded-md overflow-hidden mb-4 relative">
-      <?php if ( $video_url ) : ?>
-      <?php if ( preg_match( '/\\.mp4($|\\?)/', $video_url ) ) : ?>
+      <?php
+    $video_raw = get_post_meta( get_the_ID(), '_mt_video_url', true );
+    $video_raw = trim( (string) $video_raw );
+
+    if ( $video_raw ) :
+
+        // 1) ถ้า user แปะโค้ด <iframe ...> มา → ใช้ตามนั้นเลย
+        if ( stripos( $video_raw, '<iframe' ) !== false ) : ?>
+
+      <div class="relative w-full h-[400px]">
+        <div class="absolute inset-0">
+          <?php echo $video_raw; ?>
+        </div>
+      </div>
+
+      <?php
+        // 2) ถ้าเป็น mp4 → <video>
+        elseif ( preg_match( '/\.mp4($|\?)/i', $video_raw ) ) : ?>
+
       <video class="w-full" controls
         poster="<?php echo esc_url( get_the_post_thumbnail_url( get_the_ID(), 'large' ) ); ?>">
-        <source src="<?php echo esc_url( $video_url ); ?>" type="video/mp4">
+        <source src="<?php echo esc_url( $video_raw ); ?>" type="video/mp4">
       </video>
+      <?php
+        // 3) ที่เหลือค่อยเล่น YouTube / oEmbed ตามเดิม (optional)
+        else :
+
+            $parsed    = wp_parse_url( $video_raw );
+            $host      = isset( $parsed['host'] ) ? strtolower( $parsed['host'] ) : '';
+            $path      = isset( $parsed['path'] ) ? $parsed['path'] : '';
+            $embed_url = '';
+
+            if ( $host && ( strpos( $host, 'youtube.com' ) !== false || strpos( $host, 'youtu.be' ) !== false ) ) {
+                if ( strpos( $host, 'youtube.com' ) !== false && ! empty( $parsed['query'] ) ) {
+                    parse_str( $parsed['query'], $query_args );
+                    if ( ! empty( $query_args['v'] ) ) {
+                        $embed_url = 'https://www.youtube.com/embed/' . $query_args['v'];
+                    }
+                }
+                if ( ! $embed_url && strpos( $host, 'youtu.be' ) !== false && ! empty( $path ) ) {
+                    $video_id  = trim( $path, '/' );
+                    $embed_url = 'https://www.youtube.com/embed/' . $video_id;
+                }
+                if ( ! $embed_url && strpos( $path, '/embed/' ) !== false ) {
+                    $embed_url = 'https://www.youtube.com' . $path;
+                }
+            }
+
+            if ( $embed_url ) : ?>
+
+      <div class="relative w-full">
+        <iframe class="absolute inset-0 w-full h-[400px]" src="<?php echo esc_url( $embed_url ); ?>" frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+      </div>
+
+      <?php else :
+
+                $embed_html = wp_oembed_get( $video_raw, array(
+                    'width'  => 1280,
+                    'height' => 720,
+                ) );
+
+                if ( $embed_html ) : ?>
+      <div class="relative w-full h-[400px]">
+        <div class="absolute inset-0">
+          <?php echo $embed_html; ?>
+        </div>
+      </div>
       <?php else : ?>
-      <iframe class="w-full h-64 md:h-[420px]" src="<?php echo esc_url( $video_url ); ?>" frameborder="0"
-        allowfullscreen></iframe>
+      <div
+        class="w-full h-64 md:h-[420px] bg-gray-900 flex flex-col items-center justify-center text-gray-400 text-sm px-4 text-center">
+        <p>Cannot embed this video URL automatically.</p>
+        <p class="mt-2">
+          <a href="<?php echo esc_url( $video_raw ); ?>" target="_blank" class="text-pink-500 underline">
+            Open video in new tab
+          </a>
+        </p>
+      </div>
       <?php endif; ?>
+      <?php endif; ?>
+
+      <?php endif; ?>
+
       <?php else : ?>
       <div class="w-full h-64 md:h-[420px] bg-gray-900 flex items-center justify-center text-gray-500">
         No video URL set.
@@ -243,7 +316,6 @@ if ( have_posts() ) :
         </h3>
         <div class="text-[10px] text-gray-400 flex justify-between">
           <span><?php echo get_post_meta( get_the_ID(), '_mt_video_code', true ); ?></span>
-          <span><?php echo get_the_date(); ?></span>
         </div>
       </div>
     </article>
