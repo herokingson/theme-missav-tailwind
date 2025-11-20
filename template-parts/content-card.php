@@ -12,9 +12,6 @@ $video_url = get_post_meta( get_the_ID(), '_mt_video_url', true );
       No thumbnail
     </div>
     <?php endif; ?>
-    <div class="absolute bottom-1 right-1 bg-black bg-opacity-70 text-xs px-1 rounded">
-      <?php echo get_the_date('Y-m-d'); ?>
-    </div>
   </a>
   <div class="p-2">
     <h3 class="text-sm font-semibold mb-1">

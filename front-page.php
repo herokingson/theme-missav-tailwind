@@ -65,14 +65,18 @@ function mt_render_section_by_category( $slug, $title ) {
 }
 endif;
 
-// เรียก section – ต้องมี category slug เหล่านี้ และผูกกับ video CPT แล้ว
-mt_render_section_by_category( 'recommended',    'Recommended for you' );
-mt_render_section_by_category( 'creampie',       'Creampie' );
-mt_render_section_by_category( 'big-breasts',    'Big Breasts' );
-mt_render_section_by_category( 'new-releases',   'New Releases' );
-mt_render_section_by_category( 'recent-update',  'Recent update' );
-mt_render_section_by_category( 'uncensored',     'Uncensored' );
-mt_render_section_by_category( 'random',         'Random' );
+// ดึงทุก category ที่มีโพสต์ (และใช้กับ video CPT ด้วย)
+$terms = get_terms( array(
+'taxonomy' => 'category',
+'hide_empty' => true,
+) );
+
+if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+foreach ( $terms as $term ) {
+// ใช้ slug และชื่อ category เป็น title
+mt_render_section_by_category( $term->slug, $term->name );
+}
+}
 
 get_footer();
 ?>
