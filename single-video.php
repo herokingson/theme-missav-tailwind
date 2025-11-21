@@ -29,7 +29,7 @@ if ( have_posts() ) :
         if ( stripos( $video_raw, '<iframe' ) !== false ) : ?>
 
       <div class="relative w-full h-[400px]">
-        <div class="absolute inset-0">
+        <div class="absolute inset-0 [&>iframe]:h-full">
           <?php echo $video_raw; ?>
         </div>
       </div>
