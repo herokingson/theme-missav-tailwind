@@ -60,7 +60,7 @@ $q = new WP_Query( array(
         ?>
 </div>
 
-<div class="flex justify-center mt-6 gap-5">
+<div class="flex justify-center mt-6 gap-[15px]">
   <?php
         echo paginate_links( array(
             'total'   => $q->max_num_pages,

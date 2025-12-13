@@ -82,7 +82,7 @@ mt_render_section_by_category( $term->slug, $term->name );
 // Section: Random Videos
 $rand_q = new WP_Query(array(
   'post_type' => 'video',
-  'posts_per_page' => 8,
+  'posts_per_page' => 18,
   'orderby' => 'rand',
   'ignore_sticky_posts' => true,
 ));
