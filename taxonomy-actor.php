@@ -11,16 +11,16 @@ $paged = get_query_var( 'paged' ) ? (int) get_query_var( 'paged' ) : 1;
 $sort  = isset( $_GET['sort'] ) ? sanitize_text_field( wp_unslash( $_GET['sort'] ) ) : 'date_desc';
 $order = ( $sort === 'date_asc' ) ? 'ASC' : 'DESC';
 
-// query วิดีโอในหมวดนี้เท่านั้น
+// query วิดีโอใน Actor นี้เท่านั้น
 $q = new WP_Query( array(
     'post_type'      => 'video',
-  'posts_per_page' => 8,
+    'posts_per_page' => 18,
     'paged'          => $paged,
     'orderby'        => 'date',
     'order'          => $order,
     'tax_query'      => array(
         array(
-            'taxonomy' => 'category',
+            'taxonomy' => 'actor',
             'field'    => 'term_id',
             'terms'    => $term->term_id,
         ),
@@ -28,22 +28,36 @@ $q = new WP_Query( array(
 ) );
 ?>
 
-<header class="mb-6">
-  <h1 class="text-2xl md:text-3xl font-semibold text-center mb-6">
-    Search result of <span class="text-pink-500"><?php echo esc_html( $title ); ?></span>
+<header class="mb-6 flex flex-col items-center">
+  <?php
+    $image_id = get_term_meta( $term->term_id, 'mt_actor_image_id', true );
+    if ( $image_id ) {
+        $img_src = wp_get_attachment_image_url( $image_id, 'medium' );
+        if ( $img_src ) {
+            echo '<img src="' . esc_url( $img_src ) . '" alt="' . esc_attr( $title ) . '" class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover mb-4 border-2 border-pink-500 shadow-md">';
+        }
+    }
+  ?>
+  <h1 class="text-2xl md:text-3xl font-semibold text-center mb-2">
+    <span class="text-pink-500"><?php echo esc_html( $title ); ?></span>
   </h1>
 
-  <div class="flex items-center justify-end text-sm text-gray-300 flex-wrap gap-3">
+  <?php if ( term_description() ) : ?>
+  <div class="text-gray-400 text-sm max-w-2xl text-center mb-6">
+    <?php echo term_description(); ?>
+  </div>
+  <?php endif; ?>
 
-    <form method="get" class="flex items-center space-x-2">
-      <span class="text-gray-400">Sort by:</span>
+  <div class="flex items-center justify-end text-sm text-gray-300 flex-wrap gap-3 w-full">
+    <form method="get" class="flex items-center space-x-2 ml-auto">
+      <span class="text-gray-400">เรียงตาม:</span>
       <select name="sort" class="bg-gray-900 border border-gray-700 text-xs px-2 py-1 rounded-md focus:outline-none"
         onchange="this.form.submit()">
         <option value="date_desc" <?php selected( $sort, 'date_desc' ); ?>>
-          Release date (newest)
+          วันที่จำหน่าย (ใหม่สุด)
         </option>
         <option value="date_asc" <?php selected( $sort, 'date_asc' ); ?>>
-          Release date (oldest)
+          วันที่จำหน่าย (เก่าสุด)
         </option>
       </select>
     </form>
@@ -60,19 +74,19 @@ $q = new WP_Query( array(
         ?>
 </div>
 
-<div class="flex justify-center mt-6 gap-5">
+<div class="mt-6">
   <?php
         echo paginate_links( array(
             'total'   => $q->max_num_pages,
             'current' => $paged,
             'mid_size'=> 2,
-            'prev_text' => '« Prev',
-            'next_text' => 'Next »',
+            'prev_text' => '« ก่อนหน้า',
+            'next_text' => 'ถัดไป »',
         ) );
         ?>
 </div>
 <?php else : ?>
-<p class="text-center text-gray-400 mt-10">No videos found in this category.</p>
+<p class="text-center text-gray-400 mt-10">ไม่พบวิดีโอของนักแสดงคนนี้</p>
 <?php endif; ?>
 
 <?php

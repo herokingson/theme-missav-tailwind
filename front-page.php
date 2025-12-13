@@ -78,5 +78,34 @@ mt_render_section_by_category( $term->slug, $term->name );
 }
 }
 
+
+// Section: Random Videos
+$rand_q = new WP_Query(array(
+  'post_type' => 'video',
+  'posts_per_page' => 8,
+  'orderby' => 'rand',
+  'ignore_sticky_posts' => true,
+));
+
+if ($rand_q->have_posts()): ?>
+    <section class="mb-10">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-pink-500">
+          <span class="text-gray-200">สุ่มวิดีโอ</span> (Random Pick)
+        </h2>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <?php
+        while ($rand_q->have_posts()):
+          $rand_q->the_post();
+          get_template_part('template-parts/content', 'card');
+        endwhile;
+        ?>
+      </div>
+    </section>
+    <?php
+endif;
+wp_reset_postdata();
+
 get_footer();
 ?>
