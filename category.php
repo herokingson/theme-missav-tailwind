@@ -14,7 +14,7 @@ $order = ( $sort === 'date_asc' ) ? 'ASC' : 'DESC';
 // query วิดีโอในหมวดนี้เท่านั้น
 $q = new WP_Query( array(
     'post_type'      => 'video',
-  'posts_per_page' => 15,
+  'posts_per_page' => 5,
     'paged'          => $paged,
     'orderby'        => 'date',
     'order'          => $order,
@@ -60,7 +60,7 @@ $q = new WP_Query( array(
         ?>
 </div>
 
-<div class="flex justify-center mt-6 space-x-2">
+<div class="flex justify-center mt-6 space-x-2 [&>*_a:hover]:text-pink-500">
   <?php
         echo paginate_links( array(
             'total'   => $q->max_num_pages,
