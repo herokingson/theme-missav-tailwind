@@ -3,6 +3,6 @@
 @tailwind utilities;
 
 
-.custom-logo{
-  @apply w-[35px];
+.custom-logo-link > .custom-logo{
+  @apply w-auto h-[35px];
 }
