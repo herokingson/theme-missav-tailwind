@@ -27,7 +27,7 @@ function mt_render_section_by_category( $slug, $title ) {
 
     $q = new WP_Query( array(
         'post_type'           => 'video',        // CPT ของคุณ
-        'posts_per_page'      => 6,
+      'posts_per_page' => 8,
         'ignore_sticky_posts' => true,
         'tax_query'           => array(
             array(
