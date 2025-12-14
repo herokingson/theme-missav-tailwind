@@ -127,6 +127,7 @@ function mt_register_actor_taxonomy()
     'update_item' => __('Update Actor', 'missav-tailwind'),
     'add_new_item' => __('Add New Actor', 'missav-tailwind'),
     'new_item_name' => __('New Actor Name', 'missav-tailwind'),
+    'view_item' => __('View Actor', 'missav-tailwind'),
     'menu_name' => __('Actors', 'missav-tailwind'),
   );
 
@@ -728,8 +729,10 @@ function mt_modify_archive_query($query) {
     }
 
     if ( is_category() || is_tag() || is_tax('actor') ) {
-        $query->set('posts_per_page', 8); 
+    $query->set('posts_per_page', 8);
         $query->set('post_type', 'video');
     }
 }
 add_action( 'pre_get_posts', 'mt_modify_archive_query' );
+
+require_once get_template_directory() . '/flush_rules.php';
