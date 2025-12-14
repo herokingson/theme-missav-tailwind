@@ -54,6 +54,14 @@ function mt_enqueue_assets()
       true
     );
 
+    wp_enqueue_script(
+      'mt-sidebar-tabs',
+      get_template_directory_uri() . '/assets/js/sidebar-tabs.js',
+      array(), // No dependency on jQuery needed for this vanilla JS
+      '1.0',
+      true
+    );
+
     wp_localize_script(
       'mt-video-actions',
       'mtVideoActions',
@@ -309,9 +317,12 @@ function mt_video_meta_box_callback($post)
   $video_url = get_post_meta($post->ID, '_mt_video_url', true);
   // $label_1 = get_post_meta( $post->ID, '_mt_video_label_1', true );
   // $label_2 = get_post_meta( $post->ID, '_mt_video_label_2', true );
-  $release_date = get_post_meta($post->ID, '_mt_video_release_date', true);
   $video_code = get_post_meta($post->ID, '_mt_video_code', true);
-  $video_description = get_post_meta($post->ID, '_mt_video_description', true);
+  $video_description = get_post_meta($post->ID, '_mt_seo_description', true);
+  $view_count = get_post_meta($post->ID, '_mt_view_count', true);
+  $view_count_week = get_post_meta($post->ID, '_mt_view_count_week', true);
+  $studio = get_post_meta($post->ID, '_mt_video_studio', true);
+  $duration = get_post_meta($post->ID, '_mt_video_duration', true);
 
   wp_nonce_field('mt_save_video_meta', 'mt_video_meta_nonce');
   ?>
@@ -326,6 +337,9 @@ function mt_video_meta_box_callback($post)
       width: 100%;
       max-width: 400px;
     }
+    .mt-meta-row {
+        display: flex; gap: 20px;
+    }
   </style>
   <div class="mt-meta-grid">
     <p>
@@ -333,17 +347,43 @@ function mt_video_meta_box_callback($post)
       <input type="text" id="mt_video_url" name="mt_video_url" value="<?php echo esc_attr($video_url); ?>">
     </p>
     <p>
-      <label for="mt_video_release_date">Release date (เช่น 2025-04-14):</label>
-      <input type="text" id="mt_video_release_date" name="mt_video_release_date"
-        value="<?php echo esc_attr($release_date); ?>" placeholder="YYYY-MM-DD">
-    </p>
-    <p>
       <label for="mt_video_code">Code (เช่น CUS-2557):</label>
       <input type="text" id="mt_video_code" name="mt_video_code" value="<?php echo esc_attr($video_code); ?>">
     </p>
+
+    <div class="mt-meta-row">
+      <p style="flex:1;">
+        <label for="mt_video_studio">Studio:</label>
+        <input type="text" id="mt_video_studio" name="mt_video_studio" value="<?php echo esc_attr($studio); ?>">
+  </p>
+  <p style="flex:1;">
+    <label for="mt_video_duration">Video Length (เช่น 120 min):</label>
+    <input type="text" id="mt_video_duration" name="mt_video_duration" value="<?php echo esc_attr($duration); ?>">
+  </p>
+</div>
+
+<p>
+  <label for="mt_upload_date">Latest Upload Date:</label>
+  <input type="text" id="mt_upload_date" name="mt_upload_date"
+    value="<?php echo esc_attr(get_post_meta($post->ID, '_mt_upload_date', true)); ?>" placeholder="YYYY-MM-DD">
+</p>
+
+<div class="mt-meta-row">
+  <p>
+    <label for="mt_view_count">Total Views:</label>
+    <input type="number" id="mt_view_count" name="mt_view_count"
+      value="<?php echo esc_attr($view_count ? $view_count : 0); ?>">
+  </p>
+  <p>
+    <label for="mt_view_count_week">Weekly Views:</label>
+    <input type="number" id="mt_view_count_week" name="mt_view_count_week"
+      value="<?php echo esc_attr($view_count_week ? $view_count_week : 0); ?>">
+  </p>
+</div>
+
     <p>
       <label for="mt_video_description">Description:</label>
-      <textarea id="mt_video_description" name="mt_video_description" rows="3" style="width:100%;"><?php echo esc_textarea($video_description); ?></textarea>
+      <textarea id="mt_seo_description" name="mt_seo_description" rows="3" style="width:100%;"><?php echo esc_textarea($video_description); ?></textarea>
     </p>
     <p style="margin-top:12px;color:#666;font-size:12px;">
       * Tag ด้านล่าง (After the..., Thai girl, Elephant Media ฯลฯ) แนะนำให้ใช้ Post Tags ปกติของ WordPress
@@ -371,9 +411,13 @@ function mt_save_video_meta($post_id)
     '_mt_video_url' => 'mt_video_url',
     '_mt_video_label_1' => 'mt_video_label_1',
     '_mt_video_label_2' => 'mt_video_label_2',
-    '_mt_video_release_date' => 'mt_video_release_date',
     '_mt_video_code' => 'mt_video_code',
-    '_mt_video_description' => 'mt_video_description',
+    '_mt_video_studio' => 'mt_video_studio',
+    '_mt_video_duration' => 'mt_video_duration',
+    '_mt_seo_description' => 'mt_seo_description', // Map text area to SEO desc
+    '_mt_view_count' => 'mt_view_count',
+    '_mt_view_count_week' => 'mt_view_count_week',
+    '_mt_upload_date' => 'mt_upload_date',
   );
 
   foreach ($fields as $meta_key => $form_key) {
@@ -397,20 +441,67 @@ function mt_save_video_meta($post_id)
 
         // ถ้า user ใส่แค่ URL เฉย ๆ ก็จะไม่โดนตัดอะไร
         $value = wp_kses($raw, $allowed_tags);
-      } else if ($meta_key === '_mt_video_description') {
+      } else if ($meta_key === '_mt_seo_description') {
         $value = sanitize_textarea_field($raw);
-    } else {
-    // ฟิลด์อื่น sanitize ปกติ
-    $value = sanitize_text_field( $raw );
-    }
+      } else {
+        // ฟิลด์อื่น sanitize ปกติ
+        $value = sanitize_text_field($raw);
+      }
 
       update_post_meta($post_id, $meta_key, $value);
     } else {
-      delete_post_meta($post_id, $meta_key);
+      // delete_post_meta($post_id, $meta_key); // Commented out to prevent accidental deletion if field missing
     }
   }
 }
 add_action('save_post', 'mt_save_video_meta');
+
+/**
+ * View Counting Logic
+ */
+function mt_track_post_views()
+{
+  if (!is_singular('video'))
+    return;
+
+  global $post;
+  if (empty($post->ID))
+    return;
+
+  $post_id = $post->ID;
+
+  // Prevent counting bots (optional but good)
+  // if ( ... ) return;
+
+  // 1. Total View
+  $count = (int) get_post_meta($post_id, '_mt_view_count', true);
+  $count++;
+  update_post_meta($post_id, '_mt_view_count', $count);
+
+  // 2. Weekly View
+  // Logic: Store '_mt_week_number' (e.g. "2023-42" -> Year-Week).
+  // If current week != stored week, reset count to 0.
+
+  $current_week_id = date('W-Y'); // e.g., "50-2025"
+  $stored_week_id = get_post_meta($post_id, '_mt_week_number', true);
+  $week_count = (int) get_post_meta($post_id, '_mt_view_count_week', true);
+
+  if ($stored_week_id !== $current_week_id) {
+    // New week -> Reset
+    $week_count = 0;
+    update_post_meta($post_id, '_mt_week_number', $current_week_id);
+  }
+
+  $week_count++;
+  update_post_meta($post_id, '_mt_view_count_week', $week_count);
+}
+add_action('wp_head', 'mt_track_post_views');
+
+function mt_get_post_views($post_id)
+{
+  $count = get_post_meta($post_id, '_mt_view_count', true);
+  return $count ? number_format((int) $count) : '0';
+}
 
 
 /**
@@ -572,102 +663,7 @@ function mt_register_footer_sidebars()
 }
 add_action('widgets_init', 'mt_register_footer_sidebars');
 
-/**
- * SEO meta box: title + description
- */
-function mt_add_seo_meta_box()
-{
-  // post types ที่อยากให้มี field SEO
-  $post_types = array('post', 'page', 'video');
 
-  foreach ($post_types as $pt) {
-    add_meta_box(
-      'mt_seo_meta',
-      __('SEO Settings', 'missav-tailwind'),
-      'mt_seo_meta_box_callback',
-      $pt,
-      'normal',
-      'low'
-    );
-  }
-}
-add_action('add_meta_boxes', 'mt_add_seo_meta_box');
-
-function mt_seo_meta_box_callback($post)
-{
-  $seo_title = get_post_meta($post->ID, '_mt_seo_title', true);
-  $seo_desc = get_post_meta($post->ID, '_mt_seo_description', true);
-
-  wp_nonce_field('mt_save_seo_meta', 'mt_seo_meta_nonce');
-  ?>
-  <style>
-    .mt-seo-field label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .mt-seo-field input,
-    .mt-seo-field textarea {
-      width: 100%;
-      max-width: 600px;
-    }
-
-    .mt-seo-note {
-      font-size: 11px;
-      color: #666;
-    }
-  </style>
-  <div class="mt-seo-field">
-    <p>
-      <label for="mt_seo_title">SEO Title</label>
-      <input type="text" id="mt_seo_title" name="mt_seo_title" value="<?php echo esc_attr($seo_title); ?>">
-      <span class="mt-seo-note">แนะนำไม่เกิน ~60 ตัวอักษร</span>
-    </p>
-
-    <p>
-      <label for="mt_seo_description">SEO Description</label>
-      <textarea id="mt_seo_description" name="mt_seo_description"
-        rows="3"><?php echo esc_textarea($seo_desc); ?></textarea>
-      <span class="mt-seo-note">แนะนำไม่เกิน ~155 ตัวอักษร</span>
-    </p>
-  </div>
-<?php
-}
-
-function mt_save_seo_meta($post_id)
-{
-  if (!isset($_POST['mt_seo_meta_nonce'])) {
-    return;
-  }
-  if (!wp_verify_nonce($_POST['mt_seo_meta_nonce'], 'mt_save_seo_meta')) {
-    return;
-  }
-  if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-    return;
-  }
-  if (!current_user_can('edit_post', $post_id)) {
-    return;
-  }
-
-  $fields = array(
-    '_mt_seo_title' => 'mt_seo_title',
-    '_mt_seo_description' => 'mt_seo_description',
-  );
-
-  foreach ($fields as $meta_key => $form_key) {
-    if (isset($_POST[$form_key])) {
-      $value = ($meta_key === '_mt_seo_description')
-        ? sanitize_textarea_field(wp_unslash($_POST[$form_key]))
-        : sanitize_text_field(wp_unslash($_POST[$form_key]));
-
-      update_post_meta($post_id, $meta_key, $value);
-    } else {
-      delete_post_meta($post_id, $meta_key);
-    }
-  }
-}
-add_action('save_post', 'mt_save_seo_meta');
 
 /**
  * Override document title ด้วย SEO Title ถ้ามี
@@ -682,7 +678,7 @@ function mt_filter_document_title($title)
   }
   return $title;
 }
-add_filter('pre_get_document_title', 'mt_filter_document_title');
+// add_filter('pre_get_document_title', 'mt_filter_document_title');
 
 /**
  * Output meta description จาก SEO Description

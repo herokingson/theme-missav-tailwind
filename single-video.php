@@ -6,9 +6,9 @@ if (have_posts()):
     the_post();
 
     $video_url = get_post_meta(get_the_ID(), '_mt_video_url', true);
-    $release_date = get_post_meta(get_the_ID(), '_mt_video_release_date', true);
+
     $video_code = get_post_meta(get_the_ID(), '_mt_video_code', true);
-    $video_description = get_post_meta(get_the_ID(), '_mt_video_description', true);
+
 
     $is_logged = is_user_logged_in();
     $user_id = get_current_user_id();
@@ -112,9 +112,45 @@ if (have_posts()):
     </div>
 
     <!-- ชื่อเรื่องใต้ player -->
+    <!-- ชื่อเรื่องใต้ player -->
     <h1 class="text-lg md:text-xl font-semibold mb-2">
       <?php the_title(); ?>
+      <?php if ($video_code): ?>
+        <span class="ml-2 inline-block px-2 py-0.5 rounded bg-pink-600 text-white text-xs align-middle">
+          <?php echo esc_html($video_code); ?>
+        </span>
+      <?php endif; ?>
     </h1>
+
+    <!-- Video Stats -->
+    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-4">
+
+
+      <?php
+        $upload_date = get_post_meta(get_the_ID(), '_mt_upload_date', true);
+        if ($upload_date):
+          ?>
+        <div class="flex items-center">
+          <span class="font-semibold text-gray-300 mr-1">Latest Date:</span>
+          <?php echo esc_html($upload_date); ?>
+        </div>
+      <?php endif; ?>
+    
+      <?php
+      $view_count = get_post_meta(get_the_ID(), '_mt_view_count', true);
+      $view_count_week = get_post_meta(get_the_ID(), '_mt_view_count_week', true);
+      ?>
+    
+      <div class="flex items-center">
+        <span class="font-semibold text-gray-300 mr-1">Total Views: </span>
+        <?php echo ' ' . $view_count ? number_format($view_count) : '0'; ?>
+      </div>
+    
+      <div class="flex items-center">
+        <span class="font-semibold text-gray-300 mr-1">Weekly Views: </span>
+        <?php echo ' ' . $view_count_week ? number_format($view_count_week) : '0'; ?>
+      </div>
+    </div>
 
     <!-- action row: Save / Playlist / Download / Share -->
     <div
@@ -218,12 +254,24 @@ if (have_posts()):
         </div> -->
             <?php //endif;
                 ?>
-            <?php if ($release_date): ?>
-            <div class="flex justify-between border-b border-gray-800 py-1">
-              <span class="text-gray-400">วันที่จำหน่าย</span>
-                <span class="text-gray-200"><?php echo esc_html($release_date); ?></span>
+<?php
+      $studio = get_post_meta(get_the_ID(), '_mt_video_studio', true);
+      $duration = get_post_meta(get_the_ID(), '_mt_video_duration', true);
+      ?>
+
+<?php if ($studio): ?>
+<div class="flex justify-between border-b border-gray-800 py-1">
+                <span class="text-gray-400">สตูดิโอ</span>
+                <span class="text-gray-200"><?php echo esc_html($studio); ?></span>
               </div>
               <?php endif; ?>
+<?php if ($duration): ?>
+  <div class="flex justify-between border-b border-gray-800 py-1">
+    <span class="text-gray-400">ความยาววิดีโอ</span>
+    <span class="text-gray-200"><?php echo esc_html($duration); ?></span>
+  </div>
+<?php endif; ?>
+
               <?php
               $actors = get_the_term_list(get_the_ID(), 'actor', '', ', ');
               if ($actors && !is_wp_error($actors)):
@@ -241,14 +289,7 @@ if (have_posts()):
                 <span class="text-gray-200"><?php echo esc_html($video_code); ?></span>
           </div>
           <?php endif; ?>
-          <?php if ($video_description): ?>
-          <div class="flex h-auto justify-between border-b border-gray-800 py-1">
-            <span class="block text-gray-400 mb-1">รายละเอียด</span>
-            <div class="text-gray-200 text-sm ">
-              <?php echo esc_html($video_description); ?>
-            </div>
-          </div>
-          <?php endif; ?>
+
           <div class="flex justify-between border-b border-gray-800 py-1">
                   <span class="text-gray-400">ชื่อเรื่อง</span>
                   <span class="text-gray-200"><?php the_title(); ?></span>
@@ -277,44 +318,85 @@ if (have_posts()):
 
       <!-- ด้านขวา: วิดีโออื่นๆ (sidebar) -->
       <aside class="md:w-1/3 mt-6 md:mt-0">
-        <h2 class="text-sm font-semibold mb-3 text-gray-200">วิดีโอเพิ่มเติม</h2>
-        <div class="space-y-3">
+        <!-- Tab Headers -->
+        <div class="flex w-full border-b border-gray-800 mb-4">
+          <button type="button" class="flex-1 py-3 text-sm font-semibold text-pink-500 border-b-2 border-pink-500 transition-colors js-tab-btn" data-target="#tab-latest">
+            ล่าสุด
+          </button>
+          <button type="button" class="flex-1 py-3 text-sm font-semibold text-gray-400 hover:text-gray-200 border-b-2 border-transparent hover:border-gray-700 transition-colors js-tab-btn" data-target="#tab-popular">
+            ยอดนิยม
+          </button>
+          <button type="button" class="flex-1 py-3 text-sm font-semibold text-gray-400 hover:text-gray-200 border-b-2 border-transparent hover:border-gray-700 transition-colors js-tab-btn" data-target="#tab-week">
+            สัปดาห์
+          </button>
+        </div>
+
+        <!-- Tab Content: Latest -->
+        <div id="tab-latest" class="space-y-3 js-tab-content">
           <?php
-          $sidebar_q = new WP_Query(array(
+          $sidebar_latest = new WP_Query(array(
             'post_type' => 'video',
             'posts_per_page' => 8,
             'post__not_in' => array(get_the_ID()),
+            'ignore_sticky_posts' => 1,
           ));
 
-          if ($sidebar_q->have_posts()):
-            while ($sidebar_q->have_posts()):
-              $sidebar_q->the_post(); ?>
-                                      <div class="w-full flex space-x-2">
-                                        <a href="<?php the_permalink(); ?>" class="w-28 flex-shrink-0">
-                  <?php if (has_post_thumbnail()) {
-                    the_post_thumbnail('thumbnail', array(
-                      'class' => 'w-28 h-16 object-cover rounded'
-                    ));
-                  } else { ?>
-                    <div class="w-28 h-16 bg-gray-800 rounded"></div>
-                  <?php } ?>
-                </a>
-                            <div class="flex-1">
-                              <h3 class="text-sm font-medium leading-tight mb-1">
-                                <a href="<?php the_permalink(); ?>" class="hover:text-pink-500 transition-colors">
-                                  <?php the_title(); ?>
-                                </a>
-                              </h3>
-                              <div class="text-xs text-gray-500">
-                    <?php echo get_the_date(); ?>
-                              </div>
-                              </div>
-                              </div>
-                              <?php
+          if ($sidebar_latest->have_posts()):
+            while ($sidebar_latest->have_posts()):
+              $sidebar_latest->the_post();
+              get_template_part('template-parts/content', 'sidebar-item');
             endwhile;
             wp_reset_postdata();
           else: ?>
-                        <p class="text-xs text-gray-500">ไม่พบวิดีโอ</p>
+                  <p class="text-xs text-gray-500">ไม่พบวิดีโอ</p>
+          <?php endif; ?>
+        </div>
+
+        <!-- Tab Content: Popular -->
+        <div id="tab-popular" class="space-y-3 hidden js-tab-content">
+          <?php
+          $sidebar_popular = new WP_Query(array(
+            'post_type' => 'video',
+            'posts_per_page' => 8,
+            'post__not_in' => array(get_the_ID()),
+            'meta_key' => '_mt_view_count',
+            'orderby' => 'meta_value_num',
+            'order' => 'DESC',
+            'ignore_sticky_posts' => 1,
+          ));
+
+          if ($sidebar_popular->have_posts()):
+            while ($sidebar_popular->have_posts()):
+              $sidebar_popular->the_post();
+              get_template_part('template-parts/content', 'sidebar-item');
+            endwhile;
+            wp_reset_postdata();
+          else: ?>
+                  <p class="text-xs text-gray-500">ไม่มีข้อมูลยอดนิยม</p>
+          <?php endif; ?>
+        </div>
+
+        <!-- Tab Content: Week -->
+        <div id="tab-week" class="space-y-3 hidden js-tab-content">
+          <?php
+    $sidebar_week = new WP_Query(array(
+            'post_type' => 'video',
+            'posts_per_page' => 8,
+            'post__not_in' => array(get_the_ID()),
+            'meta_key' => '_mt_view_count_week',
+            'orderby' => 'meta_value_num',
+            'order' => 'DESC',
+            'ignore_sticky_posts' => 1,
+          ));
+
+          if ($sidebar_week->have_posts()):
+            while ($sidebar_week->have_posts()):
+              $sidebar_week->the_post();
+              get_template_part('template-parts/content', 'sidebar-item');
+            endwhile;
+            wp_reset_postdata();
+          else: ?>
+            <p class="text-xs text-gray-500">ไม่มีข้อมูลในสัปดาห์นี้</p>
           <?php endif; ?>
         </div>
       </aside>
@@ -344,14 +426,25 @@ if (have_posts()):
                 } else { ?>
                   <div class="w-full h-32 bg-gray-800"></div>
                 <?php } ?>
-                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition"></div>
+                <div class="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-20 transition"></div>
               </a>
                           <div class="p-2">
-                            <h3 class="text-sm font-medium text-gray-200 group-hover:text-pink-500 transition-colors line-clamp-2">
+                            <h3 class="text-sm font-medium text-gray-200 group-hover:border-pink-500 transition-colors line-clamp-2">
                               <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
                             </h3>
-                            <div class="text-xs text-gray-500 mt-1 flex justify-between">
-                              <span><?php echo get_the_date('M j, Y'); ?></span>
+                            <div class="flex flex-wrap text-sm text-gray-400 space-x-1 mt-3">
+              <span>
+                <?php
+                                  $upload_date = get_post_meta(get_the_ID(), '_mt_upload_date', true);
+                                  echo $upload_date ? esc_html($upload_date) : get_the_date();
+                                  ?>
+                              </span>
+                              <?php if (function_exists('mt_get_post_views')): ?>
+                                <span>|</span>
+                                <span>
+                                  <?php echo mt_get_post_views(get_the_ID()); ?> views
+                                </span>
+                              <?php endif; ?>
                             </div>
                             </div>
                             </article>
