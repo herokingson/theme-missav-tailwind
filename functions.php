@@ -44,7 +44,18 @@ function mt_enqueue_assets()
     get_stylesheet_uri(),
     array('tailwind'),
     '1.0'
-  ); // โหลดสคริปต์เฉพาะหน้า single post / single video
+  );
+
+  // Mobile menu script - loads on all pages
+  wp_enqueue_script(
+    'mt-mobile-menu',
+    get_template_directory_uri() . '/assets/js/mobile-menu.js',
+    array(),
+    '1.0',
+    true
+  );
+
+  // โหลดสคริปต์เฉพาะหน้า single post / single video
   if (is_singular(array('post', 'video'))) {
     wp_enqueue_script(
       'mt-video-actions',

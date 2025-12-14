@@ -6,3 +6,72 @@ Description: Minimal video gallery theme using Tailwind CSS
 Version: 1.0
 Text Domain: missav-tailwind
 */
+
+/* Mobile Navigation Menu Styles */
+.mt-mobile-nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mt-mobile-nav li {
+  margin: 0;
+  padding: 0;
+}
+
+.mt-mobile-nav > li > a {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  margin-bottom: 4px;
+  color: #e5e7eb;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+  background: transparent;
+  text-decoration: none;
+}
+
+.mt-mobile-nav > li > a:hover {
+  background: linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(139,92,246,0.1) 100%);
+  color: #f472b6;
+  padding-left: 24px;
+}
+
+.mt-mobile-nav > li.current-menu-item > a,
+.mt-mobile-nav > li.current_page_item > a {
+  background: linear-gradient(135deg, rgba(236,72,153,0.25) 0%, rgba(139,92,246,0.15) 100%);
+  color: #ec4899;
+  border-left: 3px solid #ec4899;
+}
+
+/* Submenu styles */
+.mt-mobile-nav .sub-menu {
+  list-style: none;
+  margin: 0 0 8px 0;
+  padding: 0 0 0 20px;
+  border-left: 2px solid #374151;
+}
+
+.mt-mobile-nav .sub-menu li a {
+  display: block;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #9ca3af;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.mt-mobile-nav .sub-menu li a:hover {
+  background: rgba(255,255,255,0.05);
+  color: #f472b6;
+}
+
+/* Hide burger on desktop */
+@media (min-width: 768px) {
+  #mt-burger-toggle {
+    display: none !important;
+  }
+}

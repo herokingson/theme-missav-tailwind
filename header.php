@@ -24,7 +24,7 @@
         <?php endif; ?>
       </div>
 
-      <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-3">
         <nav class="hidden md:block">
           <?php
                     wp_nav_menu( array(
@@ -44,6 +44,74 @@
               d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
           </svg>
         </button>
+
+        <!-- Burger Menu Button (Mobile Only) - ใช้ inline style เพื่อความแน่ใจ -->
+        <button type="button" id="mt-burger-toggle"
+          class="p-2 rounded-lg hover:bg-pink-600 text-white focus:outline-none transition-colors duration-200"
+          style="display: flex;" aria-label="Toggle menu">
+          <svg xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mt-mobile-menu" class="fixed inset-0 hidden" style="z-index: 9999;">
+      <!-- Backdrop -->
+      <div id="mt-mobile-backdrop"
+        class="absolute inset-0 transition-opacity duration-300"
+        style="background: rgba(0,0,0,0.8); opacity: 0; backdrop-filter: blur(4px);"></div>
+
+      <!-- Menu Panel -->
+      <div id="mt-mobile-panel"
+        class="absolute top-0 right-0 h-full transition-transform duration-300 ease-out z-50"
+        style="width: 85%; max-width: 320px; background: linear-gradient(180deg, #0f0f14 0%, #090a0e 100%); transform: translateX(100%); border-left: 1px solid #1f2937;z-index:99;">
+
+        <!-- Header with gradient -->
+        <div class="flex items-center justify-between p-5" style="background: linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(139,92,246,0.1) 100%); border-bottom: 1px solid #1f2937;">
+          <div class="flex justify-between space-x-3">
+            <span class="text-lg font-bold text-white">เมนู</span>
+          </div>
+          <button type="button" id="mt-mobile-close"
+            class="p-2 rounded-lg transition-all duration-200 mr-0"
+            style="background: rgba(255,255,255,0.05); color: #9ca3af;"
+            onmouseover="this.style.background='rgba(239,68,68,0.2)'; this.style.color='#ef4444';"
+            onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#9ca3af';">
+            <svg xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <nav class="p-4 overflow-y-auto" style="max-height: calc(100vh - 80px);">
+       <?php
+      wp_nav_menu(array(
+        'theme_location' => 'primary',
+        'container' => false,
+        'menu_class' => 'mt-mobile-nav',
+        'fallback_cb' => false,
+      ));
+      ?>
+
+      <!-- Search in mobile menu -->
+      <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #1f2937;">
+        <form action="<?php echo esc_url(home_url('/')); ?>" method="get" class="flex items-center">
+          <input type="text" name="s"
+            style="flex: 1; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid #374151; border-radius: 8px 0 0 8px; color: white; font-size: 14px;"
+            placeholder="ค้นหาวิดีโอ...">
+          <button type="submit"
+            style="padding: 12px 16px; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); border-radius: 0 8px 8px 0; color: white;">
+            <svg xmlns="http://www.w3.org/2000/svg" style="width: 18px; height: 18px;" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
+            </svg>
+          </button>
+        </form>
+      </div>
+    </nav>
       </div>
     </div>
 
