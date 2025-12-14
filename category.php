@@ -14,7 +14,7 @@ $order = ( $sort === 'date_asc' ) ? 'ASC' : 'DESC';
 // query วิดีโอในหมวดนี้เท่านั้น
 $q = new WP_Query( array(
     'post_type'      => 'video',
-  'posts_per_page' => 5,
+  'posts_per_page' => 15,
     'paged'          => $paged,
     'orderby'        => 'date',
     'order'          => $order,
