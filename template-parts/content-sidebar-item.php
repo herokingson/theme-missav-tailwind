@@ -31,13 +31,15 @@ if ($raw_views >= 1000000) {
       </span>
     </div>
     <!-- Thumbnail with overlay -->
-    <a href="<?php the_permalink(); ?>" class="relative block w-28 h-[80px] flex-shrink-0 rounded overflow-hidden">
+    <a href="<?php the_permalink(); ?>" class="relative block w-28 flex-shrink-0 rounded overflow-hidden"
+      style="height:80px;">
       <?php if (has_post_thumbnail()) {
         the_post_thumbnail('thumbnail', array(
-          'class' => 'w-28 h-[80px] object-cover'
+          'class' => 'w-28 object-cover',
+          'style' => 'height:80px;'
         ));
       } else { ?>
-                              <div class="w-28 h-[80px] bg-gray-800"></div>
+                              <div class="w-28 bg-gray-800" style="height:80px;"></div>
                             <?php } ?>
   </div>
 
