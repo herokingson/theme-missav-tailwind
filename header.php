@@ -17,6 +17,7 @@
       <div class="flex items-center space-x-2">
         <?php if ( function_exists( 'the_custom_logo' ) && has_custom_logo() ) : ?>
         <?php the_custom_logo(); ?>
+        tests
         <?php else : ?>
         <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="text-2xl font-semibold text-pink-500">
           <?php bloginfo( 'name' ); ?>
