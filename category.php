@@ -60,7 +60,7 @@ $q = new WP_Query( array(
         ?>
 </div>
 
-<div class="flex justify-center mt-6 space-x-2 [&>*_a:hover]:text-pink-500">
+<div class="flex justify-center mt-6 space-x-2 pagination-wrapper">
   <?php
         echo paginate_links( array(
             'total'   => $q->max_num_pages,

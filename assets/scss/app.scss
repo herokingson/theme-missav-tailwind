@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Pagination Styles */
+.pagination-wrapper {
+  a, span {
+    @apply px-3 py-2 rounded-md text-sm text-gray-400 transition-colors;
+  }
+
+  a:hover {
+    @apply text-pink-500 bg-gray-800;
+  }
+
+  .page-numbers.current {
+    @apply text-pink-500 bg-gray-800 font-semibold;
+  }
+}
+
