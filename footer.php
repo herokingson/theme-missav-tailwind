@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       <!-- คอลัมน์ซ้าย: โลโก้ + about -->
       <div class="md:col-span-1">
-        <div class="mb-4 w-10">
+        <div class="mb-4 w-full">
           <?php if ( function_exists( 'the_custom_logo' ) && has_custom_logo() ) : ?>
           <div class="mb-2">
             <?php the_custom_logo(); ?>
