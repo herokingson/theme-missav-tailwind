@@ -33,10 +33,10 @@ add_action('after_setup_theme', 'mt_setup_theme');
 function mt_enqueue_assets()
 {
   wp_enqueue_style(
-    'mt-video-action',
+    'app-css',
     get_template_directory_uri() . '/dist/css/app.css',
-    array(),
-    '2.2.19'
+    [],
+    filemtime(get_template_directory() . '/dist/css/app.css')
   );
 
   wp_enqueue_style(
