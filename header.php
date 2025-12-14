@@ -14,7 +14,7 @@
   <header class="border-b border-gray-800 bg-[#05060a]">
     <!-- แถวบน: โลโก้ + เมนู + ปุ่ม search -->
     <div class="max-w-6xl mx-auto flex items-center justify-between py-4 px-4 md:px-0">
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-2 [&>*_.custom-logo]:h-[35px] [&>*_.custom-logo]:w-auto">
         <?php if ( function_exists( 'the_custom_logo' ) && has_custom_logo() ) : ?>
         <?php the_custom_logo(); ?>
         <?php else : ?>

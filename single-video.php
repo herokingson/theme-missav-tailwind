@@ -14,6 +14,7 @@ if (have_posts()):
     $user_id = get_current_user_id();
     $favorites = $is_logged ? mt_get_user_list($user_id, '_mt_favorite_videos') : array();
     $playlist = $is_logged ? mt_get_user_list($user_id, '_mt_playlist_videos') : array();
+    $video_description = get_post_meta(get_the_ID(), '_mt_seo_description', true);
     $is_favorite = $is_logged && in_array(get_the_ID(), $favorites, true);
     $in_playlist = $is_logged && in_array(get_the_ID(), $playlist, true);
     ?>
@@ -112,7 +113,6 @@ if (have_posts()):
     </div>
 
     <!-- ชื่อเรื่องใต้ player -->
-    <!-- ชื่อเรื่องใต้ player -->
     <h1 class="text-lg md:text-xl font-semibold mb-2">
       <?php the_title(); ?>
       <?php if ($video_code): ?>
@@ -135,17 +135,17 @@ if (have_posts()):
           <?php echo esc_html($upload_date); ?>
         </div>
       <?php endif; ?>
-    
+
       <?php
       $view_count = get_post_meta(get_the_ID(), '_mt_view_count', true);
       $view_count_week = get_post_meta(get_the_ID(), '_mt_view_count_week', true);
       ?>
-    
+
       <div class="flex items-center">
         <span class="font-semibold text-gray-300 mr-1">Total Views: </span>
         <?php echo ' ' . $view_count ? number_format($view_count) : '0'; ?>
       </div>
-    
+
       <div class="flex items-center">
         <span class="font-semibold text-gray-300 mr-1">Weekly Views: </span>
         <?php echo ' ' . $view_count_week ? number_format($view_count_week) : '0'; ?>
@@ -293,7 +293,15 @@ if (have_posts()):
           <div class="flex justify-between border-b border-gray-800 py-1">
                   <span class="text-gray-400">ชื่อเรื่อง</span>
                   <span class="text-gray-200"><?php the_title(); ?></span>
-                  </div>
+          </div>
+          <?php if ($video_description): ?>
+            <div class="flex h-auto justify-between border-b border-gray-800 py-1">
+              <span class="block text-gray-400 mb-1">รายละเอียด</span>
+              <div class="text-gray-200 text-sm ">
+                <?php echo esc_html($video_description); ?>
+              </div>
+            </div>
+          <?php endif; ?>
                   <div class="border-b border-gray-800 py-2">
                   <span class="text-gray-400">แท็ก: </span>
                   <?php
@@ -307,6 +315,7 @@ if (have_posts()):
             </div>
           </div>
         </section>
+
 
         <!-- เนื้อหาเต็ม ถ้ามี -->
         <?php if (get_the_content()): ?>
@@ -416,39 +425,56 @@ if (have_posts()):
 
         if ($bottom_q->have_posts()):
           while ($bottom_q->have_posts()):
-            $bottom_q->the_post(); ?>
-                                <article class="group bg-gray-900 rounded-md overflow-hidden hover:shadow-lg transition">
-                                  <a href="<?php the_permalink(); ?>" class="block relative">
-                <?php if (has_post_thumbnail()) {
-                  the_post_thumbnail('medium', array(
-                    'class' => 'w-full h-32 object-cover group-hover:scale-105 transform transition'
-                  ));
-                } else { ?>
-                  <div class="w-full h-32 bg-gray-800"></div>
-                <?php } ?>
-                <div class="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-20 transition"></div>
-              </a>
-                          <div class="p-2">
-                            <h3 class="text-sm font-medium text-gray-200 group-hover:border-pink-500 transition-colors line-clamp-2">
-                              <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-                            </h3>
-                            <div class="flex flex-wrap text-sm text-gray-400 space-x-1 mt-3">
-              <span>
-                <?php
-                                  $upload_date = get_post_meta(get_the_ID(), '_mt_upload_date', true);
-                                  echo $upload_date ? esc_html($upload_date) : get_the_date();
-                                  ?>
-                              </span>
-                              <?php if (function_exists('mt_get_post_views')): ?>
-                                <span>|</span>
-                                <span>
-                                  <?php echo mt_get_post_views(get_the_ID()); ?> views
-                                </span>
-                              <?php endif; ?>
-                            </div>
-                            </div>
-                            </article>
-                            <?php
+            $bottom_q->the_post();
+            // Get video metadata for overlay
+            $raw_views = (int) get_post_meta(get_the_ID(), '_mt_view_count', true);
+            $upload_date = get_the_date('Y-m-d');
+
+            // Format views count - always show as X.XXK format
+            if ($raw_views >= 1000000) {
+              $views_str = number_format($raw_views / 1000000, 2) . 'M';
+            } else {
+              $views_str = number_format($raw_views / 1000, 2) . 'K';
+            }
+            ?>
+            <article class="group bg-gray-900 rounded-md overflow-hidden hover:shadow-lg transition">
+              <div class="relative">
+                <!-- Date & Views Overlay -->
+                <div class="flex flex-row gap-1 mb-1 gap-2">
+                  <span class="px-1 py-0.5 text-white text-[10px] font-semibold rounded"
+                    style="background-color: rgb(101, 101, 101); padding: 0 2px;">
+                    <?php echo esc_html($upload_date); ?>
+                  </span>
+                  <span class="px-1 py-0.5 text-white text-[10px] font-semibold rounded flex items-center"
+                    style="background-color: #fff; color: #f65983; gap: 2px; padding: 0 2px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                      style="width: 10px; height: 10px;">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                    <span><?php echo esc_html($views_str); ?></span>
+                  </span>
+                </div>
+              
+                <!-- Thumbnail -->
+                <a href="<?php the_permalink(); ?>" class="block">
+                  <?php if (has_post_thumbnail()) {
+                    the_post_thumbnail('medium', array(
+                      'class' => 'w-full h-32 object-cover group-hover:scale-105 transform transition rounded'
+                    ));
+                  } else { ?>
+                                                  <div class="w-full h-32 bg-gray-800 rounded"></div>
+                                        <?php } ?>
+                </a>
+              </div>
+              <div class="p-2">
+                <h3 class="text-sm font-medium text-gray-200 group-hover:text-pink-500 transition-colors line-clamp-2">
+                  <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                </h3>
+              </div>
+            </article>
+            <?php
           endwhile;
           wp_reset_postdata();
         else: ?>

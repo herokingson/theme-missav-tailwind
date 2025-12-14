@@ -1,10 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-
-.custom-logo{
-  @apply w-auto h-[35px];
-  width: auto !important;
-  height: 35px !important;
-}

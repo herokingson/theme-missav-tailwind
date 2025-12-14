@@ -25,14 +25,13 @@ $video_url = get_post_meta( get_the_ID(), '_mt_video_url', true );
   </div>
 
   <!-- Views: Top Right -->
-  <?php if (function_exists('mt_get_post_views')):
+  <?php
     $raw_views = (int) get_post_meta(get_the_ID(), '_mt_view_count', true);
+  // Format views count - always show as X.XXK format
     if ($raw_views >= 1000000) {
-      $views_str = number_format($raw_views / 1000000, 2) . 'M';
-    } elseif ($raw_views >= 1000) {
-      $views_str = number_format($raw_views / 1000, 1) . 'K';
+    $views_str = number_format($raw_views / 1000000, 2) . 'M';
     } else {
-      $views_str = $raw_views;
+    $views_str = number_format($raw_views / 1000, 2) . 'K';
     }
     ?>
     <div
@@ -43,9 +42,8 @@ $video_url = get_post_meta( get_the_ID(), '_mt_video_url', true );
         <path stroke-linecap="round" stroke-linejoin="round"
           d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
       </svg>
-      <span><?php echo esc_html($views_str) . ' view'; ?></span>
+      <span><?php echo esc_html($views_str); ?></span>
     </div>
-  <?php endif; ?>
 </div>
 
 <!-- Hover Overlay Gradient -->
