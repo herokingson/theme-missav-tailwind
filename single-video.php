@@ -143,12 +143,12 @@ if (have_posts()):
 
       <div class="flex items-center">
         <span class="font-semibold text-gray-300 mr-1">Total Views: </span>
-        <?php echo ' ' . $view_count ? number_format($view_count) : '0'; ?>
+        <?php echo mt_format_views($view_count); ?>
       </div>
 
       <div class="flex items-center">
         <span class="font-semibold text-gray-300 mr-1">Weekly Views: </span>
-        <?php echo ' ' . $view_count_week ? number_format($view_count_week) : '0'; ?>
+        <?php echo mt_format_views($view_count_week); ?>
       </div>
     </div>
 
@@ -430,12 +430,8 @@ if (have_posts()):
             $raw_views = (int) get_post_meta(get_the_ID(), '_mt_view_count', true);
             $upload_date = get_the_date('Y-m-d');
 
-            // Format views count - always show as X.XXK format
-            if ($raw_views >= 1000000) {
-              $views_str = number_format($raw_views / 1000000, 2) . 'M';
-            } else {
-              $views_str = number_format($raw_views / 1000, 2) . 'K';
-            }
+            // Format views count using helper function
+            $views_str = mt_format_views($raw_views);
             ?>
             <article class="group bg-gray-900 rounded-md overflow-hidden hover:shadow-lg transition">
               <div class="relative">
@@ -456,7 +452,7 @@ if (have_posts()):
                     <span><?php echo esc_html($views_str); ?></span>
                   </span>
                 </div>
-              
+
                 <!-- Thumbnail -->
                 <a href="<?php the_permalink(); ?>" class="block">
                   <?php if (has_post_thumbnail()) {

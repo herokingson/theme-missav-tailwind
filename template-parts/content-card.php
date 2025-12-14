@@ -27,12 +27,7 @@ $video_url = get_post_meta( get_the_ID(), '_mt_video_url', true );
   <!-- Views: Top Right -->
   <?php
     $raw_views = (int) get_post_meta(get_the_ID(), '_mt_view_count', true);
-  // Format views count - always show as X.XXK format
-    if ($raw_views >= 1000000) {
-    $views_str = number_format($raw_views / 1000000, 2) . 'M';
-    } else {
-    $views_str = number_format($raw_views / 1000, 2) . 'K';
-    }
+  $views_str = mt_format_views($raw_views);
     ?>
     <div
       class="px-1.5 py-0.5 bg-pink-600 bg-opacity-90 text-[10px] text-white rounded-sm font-bold shadow-sm flex items-center space-x-1 p-1">

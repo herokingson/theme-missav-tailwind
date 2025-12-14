@@ -503,6 +503,32 @@ function mt_get_post_views($post_id)
   return $count ? number_format((int) $count) : '0';
 }
 
+/**
+ * Format views count for display
+ * - 0-999: show plain number
+ * - 1,000+: show as X.XXK format
+ * - 1,000,000+: show as X.XXM format
+ *
+ * @param int $views Raw view count
+ * @return string Formatted view string
+ */
+function mt_format_views($views)
+{
+  $views = (int) $views;
+
+  if ($views >= 1000000) {
+    // Format as M with up to 2 decimal places, trim trailing zeros
+    $formatted = $views / 1000000;
+    return rtrim(rtrim(number_format($formatted, 2), '0'), '.') . 'M';
+  } elseif ($views >= 1000) {
+    // Format as K with up to 2 decimal places, trim trailing zeros
+    $formatted = $views / 1000;
+    return rtrim(rtrim(number_format($formatted, 2), '0'), '.') . 'K';
+  } else {
+    // Below 1000, show the plain number
+    return (string) $views;
+  }
+}
 
 /**
  * Helper: primary category name

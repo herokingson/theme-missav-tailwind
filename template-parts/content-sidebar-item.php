@@ -3,12 +3,8 @@
 $raw_views = (int) get_post_meta(get_the_ID(), '_mt_view_count', true);
 $upload_date = get_the_date('Y-m-d');
 
-// Format views count - always show as X.XXK format
-if ($raw_views >= 1000000) {
-  $views_str = number_format($raw_views / 1000000, 2) . 'M';
-} else {
-  $views_str = number_format($raw_views / 1000, 2) . 'K';
-}
+// Format views count using helper function
+$views_str = mt_format_views($raw_views);
 ?>
 
 <div class="w-full flex space-x-2 relative">
